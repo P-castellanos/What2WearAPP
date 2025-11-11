@@ -22,7 +22,17 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [wardrobe, setWardrobe] = useState<WardrobeItem[]>(defaultWardrobe);
+  const [wardrobe, setWardrobe] = useState<WardrobeItem[]>(() => {
+    try {
+      const savedWardrobe = localStorage.getItem('what2wear-wardrobe');
+      if (savedWardrobe) {
+        return JSON.parse(savedWardrobe);
+      }
+    } catch (error) {
+      console.error("Could not load wardrobe from localStorage", error);
+    }
+    return defaultWardrobe;
+  });
   const isRequestPending = useRef(false);
 
   // Auto-scroll chat to bottom
@@ -32,6 +42,15 @@ const App: React.FC = () => {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [chatHistory]);
+  
+  // Persist wardrobe to localStorage
+  useEffect(() => {
+    try {
+        localStorage.setItem('what2wear-wardrobe', JSON.stringify(wardrobe));
+    } catch (error) {
+        console.error("Could not save wardrobe to localStorage", error);
+    }
+  }, [wardrobe]);
 
 
   const handleModelFinalized = (url: string) => {
@@ -54,7 +73,7 @@ const App: React.FC = () => {
     setIsLoading(false);
     setLoadingMessage('');
     setError(null);
-    setWardrobe(defaultWardrobe);
+    setWardrobe(defaultWardrobe); // This will reset the state and trigger the useEffect to update localStorage
     isRequestPending.current = false;
   };
 

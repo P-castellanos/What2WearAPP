@@ -25,17 +25,27 @@ const WardrobeModal: React.FC<WardrobeModalProps> = ({ isOpen, onClose, onAddToW
                 setError('Por favor, selecciona un archivo de imagen.');
                 return;
             }
-            const customGarmentInfo: WardrobeItem = {
-                id: `custom-${Date.now()}`,
-                name: file.name,
-                url: URL.createObjectURL(file),
-                // Simple category detection based on filename, could be improved
-                category: file.name.toLowerCase().includes('dress') ? 'dress' : 
-                          file.name.toLowerCase().includes('jacket') ? 'outerwear' :
-                          file.name.toLowerCase().includes('jeans') || file.name.toLowerCase().includes('pants') || file.name.toLowerCase().includes('skirt') ? 'bottom' :
-                          'top'
+            setError(null);
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const dataUrl = event.target?.result as string;
+                const customGarmentInfo: WardrobeItem = {
+                    id: `custom-${Date.now()}`,
+                    name: file.name,
+                    url: dataUrl,
+                    // Simple category detection based on filename, could be improved
+                    category: file.name.toLowerCase().includes('dress') ? 'dress' : 
+                              file.name.toLowerCase().includes('jacket') ? 'outerwear' :
+                              file.name.toLowerCase().includes('jeans') || file.name.toLowerCase().includes('pants') || file.name.toLowerCase().includes('skirt') ? 'bottom' :
+                              'top'
+                };
+                onAddToWardrobe(customGarmentInfo);
             };
-            onAddToWardrobe(customGarmentInfo);
+            reader.onerror = () => {
+                setError('No se pudo leer el archivo de imagen.');
+            };
+            reader.readAsDataURL(file);
         }
     };
 
