@@ -6,6 +6,17 @@
 import { GoogleGenAI, GenerateContentResponse, Modality, Type } from "@google/genai";
 import { ChatMessage, WardrobeItem } from "../types";
 
+// --- API Key Check ---
+// Crucial check to ensure the API key is available.
+// This provides a much clearer error message to the developer
+// if they haven't set up their environment variables correctly.
+const API_KEY = process.env.API_KEY;
+if (!API_KEY) {
+    throw new Error(
+        "La API Key no se encontró. Asegúrate de crear un archivo `.env.local` en la raíz de tu proyecto y añadir tu clave como `API_KEY=TU_CLAVE_AQUI`. Después, reinicia tu servidor de desarrollo."
+    );
+}
+
 const fileToPart = async (file: File) => {
     const dataUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -56,7 +67,7 @@ const handleApiResponse = (response: GenerateContentResponse): string => {
     throw new Error(errorMessage);
 };
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+const ai = new GoogleGenAI({ apiKey: API_KEY });
 
 export const generateModelImage = async (userImage: File): Promise<string> => {
     const userImagePart = await fileToPart(userImage);
