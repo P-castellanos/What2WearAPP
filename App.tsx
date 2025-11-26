@@ -97,7 +97,7 @@ const App: React.FC = () => {
     setLoadingMessage('Buscando el atuendo perfecto...');
 
     try {
-      // 1. Get outfit recommendation (JSON) from Gemini
+      // 1. Get outfit recommendation (with visual description) from Gemini
       const recommendation = await getOutfitRecommendation(wardrobe, [...currentHistory, userMessage]);
       
       const reasoningMessage: ChatMessage = {
@@ -108,31 +108,17 @@ const App: React.FC = () => {
       setChatHistory(prev => [...prev, reasoningMessage]);
       setLoadingMessage('Dando vida al look...');
       
-      // 2. Find the wardrobe items and convert their URLs to File objects
-      const outfitItems = recommendation.outfit
-        .map(itemName => wardrobe.find(item => item.name === itemName))
-        .filter((item): item is WardrobeItem => !!item);
-
-      if (outfitItems.length === 0) {
-        throw new Error("Lo siento, no pude encontrar ninguna prenda en el armario que coincida con esa petición.");
-      }
+      // 2. Generate the outfit image using the description
+      const newImageUrl = await generateOutfitImage(modelImageUrl, recommendation.outfitDescription);
       
-      const garmentFiles = await Promise.all(
-        outfitItems.map(item => urlToFile(item.url, item.name))
-      );
-
-      // 3. Generate the outfit image
-      const newImageUrl = await generateOutfitImage(modelImageUrl, garmentFiles);
-      
-      const outfitResult: Outfit = {
-        imageUrl: newImageUrl,
-        items: outfitItems,
-      };
-
       const outfitMessage: ChatMessage = {
         id: `msg-${Date.now() + 2}`,
         role: 'model',
-        content: outfitResult,
+        content: {
+          imageUrl: newImageUrl,
+          items: [], // No longer need to show individual items
+          description: recommendation.outfitDescription
+        } as any,
       };
       
       setChatHistory(prev => [...prev, outfitMessage]);

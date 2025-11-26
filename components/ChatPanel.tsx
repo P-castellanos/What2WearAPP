@@ -58,17 +58,6 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ chatHistory, onSendMessage, isLoa
         return (
             <div className="bg-gray-200/50 p-2 rounded-lg">
                 <img src={content.imageUrl} alt="Generated outfit" className="rounded-md w-full aspect-[2/3] object-cover" />
-                <div className="mt-2 text-xs">
-                    <p className="font-bold mb-1">Prendas:</p>
-                    <ul className="grid grid-cols-2 gap-1">
-                        {content.items.map(item => (
-                            <li key={item.id} className="flex items-center gap-1.5">
-                                <img src={item.url} alt={item.name} className="w-5 h-5 rounded-sm object-cover" />
-                                <span className="truncate">{item.name}</span>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
             </div>
         );
     };
